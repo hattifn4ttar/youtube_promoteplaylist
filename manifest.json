@@ -1,0 +1,23 @@
+{
+  "name": "Promote YouTube videos",
+  "description": "Promote videos in selected playlist on YouTube. Together we can fight bots",
+  "version": "1.0",
+  "manifest_version": 3,
+  "icons": {
+    "128": "/images/youtube128.png"
+  },
+  "permissions": ["storage", "tabs"],
+
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "css": ["main.css"],
+      "js": ["script.js"]
+    }
+  ],
+
+  "action": {
+    "default_title": "Start playing",
+    "default_popup": "popup.html"
+  }
+}

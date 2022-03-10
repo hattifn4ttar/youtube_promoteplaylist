@@ -1,0 +1,45 @@
+html {
+  background-color: rgb(31, 31, 31);
+  background-color: #444444;
+  background-color: #21252b;
+  color: white !important;  
+}
+.openchannels-popup {
+  padding: 20px 30px;
+}
+
+.buttons {
+  min-width: 250px;
+}
+
+.open-tabs-btn {
+  margin: 3px 1.5px;
+  padding: 8px 16px;
+  font-size: 13px;
+  background-color: #444;
+  background-color: rgba(255,255,255,0.1);
+  color: white;
+  border: 0;
+  border-radius: 5px;
+  display: inline-block;
+}
+.open-tabs-btn:hover {
+  background-color: rgba(255,255,255,0.2);
+  cursor: pointer;
+}
+
+.title {
+  width: 100%;
+  font-size: 18px;
+  font-weight: 500;
+}
+a {
+  color: rgba(255,255,255,0.8);
+}
+a:hover {
+  color: rgba(255,255,255,1);
+}
+.logo {
+  display: none;
+  max-width: 70px;
+}
