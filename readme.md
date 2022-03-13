@@ -2,7 +2,7 @@
 
 The extension will open playlist in multiple tabs and loop through videos with optimal interval.
 
-If used collectively, you can fight internet bots and promote videos that are valuable for the community.
+If used collectively, we can fight internet bots and promote videos that are valuable for the community.
 
 Built in collaboration with *[@detoxbrainwash](https://www.youtube.com/c/DetoxBrainwash)*.
 See *@detoxbrainwash* video *[https://www.youtube.com/watch?v=jowEf5tSSyc](https://www.youtube.com/watch?v=jowEf5tSSyc)* (en) and *[https://www.youtube.com/watch?v=eTSipyTLSjo](https://www.youtube.com/watch?v=eTSipyTLSjo)* (ru).
@@ -12,7 +12,8 @@ See *@detoxbrainwash* video *[https://www.youtube.com/watch?v=jowEf5tSSyc](https
 
 1. Download extension folder from GitHub - use *[this link](https://github.com/hattifn4ttar/youtube_promoteplaylist/zipball/master/)*.
 2. Unzip the archive in any location on your machine.
-3. Open Extentions manager in Chrome browser - copy this link to your browser *chrome://extensions/* (*edge://extensions/* for Edge)
+3. Open Extentions manager in Chrome browser - copy this link to your browser *chrome://extensions/*
+(Edge browser: *edge://extensions/* )
 4. Enable developer mode in the top right corner - see the screenshot.
 5. Click "Load unpacked" button in the top left corner to upload extension, select the extension folder.
 6. Extension is ready to use. To bookmark the extension, click "Extensions" button in the top right corner in the browser, the "Pin" icon next to extension name.
