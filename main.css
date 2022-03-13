@@ -10,6 +10,7 @@ html {
 
 .buttons {
   min-width: 250px;
+  margin-bottom: 20px;
 }
 
 .open-tabs-btn {

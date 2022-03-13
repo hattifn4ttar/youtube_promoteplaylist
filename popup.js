@@ -25,6 +25,7 @@ async function startScript(nTabs) {
 }
 
 document.getElementById('clickactivity20').addEventListener('click', () => startScript(20));
+document.getElementById('clickactivity15').addEventListener('click', () => startScript(15));
 document.getElementById('clickactivity10').addEventListener('click', () => startScript(10));
 document.getElementById('clickactivity5').addEventListener('click', () => startScript(5));
 document.getElementById('clickactivity3').addEventListener('click', () => startScript(3));
@@ -32,3 +33,15 @@ document.getElementById('clickactivity2').addEventListener('click', () => startS
 
 document.getElementById('githubLink').addEventListener('click', () => window.open('https://github.com/hattifn4ttar/youtube_promoteplaylist'));
 document.getElementById('youtubeLink').addEventListener('click', () => window.open('https://www.youtube.com/watch?v=eTSipyTLSjo'));
+
+chrome.storage.local.set({ like: true });
+var form = document.querySelector("form");
+form.addEventListener("change", async function(event) {
+  // console.log('change:', event.target.name, event.target.value);
+  if (event.target.name === 'like') {
+    let like = await chrome.storage.local.get('like');
+    like = like.like;
+    chrome.storage.local.set({ like: !like });
+  }
+  event.preventDefault();
+}, false);

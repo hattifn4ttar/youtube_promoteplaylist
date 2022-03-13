@@ -4,8 +4,11 @@ function getLoggedIn() {
   if (signInBtn.length && [...signInBtn].find(d => d.innerText === 'Sign in')) return false;
   return true;
 }
-function likeVideo() {
-  if (!getLoggedIn) return;
+async function likeVideo() {
+  let like = await chrome.storage.local.get('like');
+  like = like.like;
+  if (like && !getLoggedIn) return;
+
   let videoBtns = document.getElementsByClassName('style-scope ytd-video-primary-info-renderer');
   videoBtns = videoBtns[0]?.children[5]?.children[2]?.children[0]?.children[0]?.children[0];
   const likeBtn = videoBtns?.children[0];
