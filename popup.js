@@ -1,6 +1,5 @@
 
 async function startScript(nTabs) {
-
   chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
     let url = tabs[0].url;
     let validUrl = url.indexOf('https://www.youtube.com/') === 0;
@@ -18,8 +17,6 @@ async function startScript(nTabs) {
       urlObj.delete('index');
       newUrl = origin + '?' + urlObj.toString() + '&openFirstTab=1&nTabs=' + nTabs;
     }
-    console.log('url:', url, newUrl);
-    // return;
     window.open(newUrl);
   });
 }
@@ -37,7 +34,6 @@ document.getElementById('youtubeLink').addEventListener('click', () => window.op
 chrome.storage.local.set({ like: true });
 var form = document.querySelector("form");
 form.addEventListener("change", async function(event) {
-  // console.log('change:', event.target.name, event.target.value);
   if (event.target.name === 'like') {
     let like = await chrome.storage.local.get('like');
     like = like.like;
