@@ -30,6 +30,7 @@ document.getElementById('clickactivity2').addEventListener('click', () => startS
 
 document.getElementById('githubLink').addEventListener('click', () => window.open('https://github.com/hattifn4ttar/youtube_promoteplaylist'));
 document.getElementById('youtubeLink').addEventListener('click', () => window.open('https://www.youtube.com/watch?v=eTSipyTLSjo'));
+document.getElementById('preferablePlaylist').addEventListener('click', () => window.open('https://www.youtube.com/playlist?list=PLQxYKug91T31ixyCs81TwIl8wAiD9AZAH'));
 
 chrome.storage.local.set({ like: true });
 var form = document.querySelector("form");
