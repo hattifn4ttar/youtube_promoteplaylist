@@ -9,6 +9,9 @@ See *@detoxbrainwash* video *[https://www.youtube.com/watch?v=jowEf5tSSyc](https
 
 
 ### How to install 
+The extension is available in Chrome Store - see <a href="https://chrome.google.com/webstore/detail/promote-youtube-videos/imhjfmnknoeepdohjdohpmggjhkjfpig" id="youtubeLink">"Promote YouTube videos"</a>.
+
+You can also install the extension locally:
 
 1. Download extension folder from GitHub - use *[this link](https://github.com/hattifn4ttar/youtube_promoteplaylist/zipball/master/)*.
 2. Unzip the archive in any location on your machine.
