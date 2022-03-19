@@ -21,11 +21,39 @@ function commentVideo() {
   // in progress
 }
 function muteVideo() {
-  window.focus()
+  // window.focus()
   const muteBtn = document.getElementsByClassName('ytp-mute-button ytp-button');
-  if (muteBtn?.length && muteBtn[0] && muteBtn[0].title === 'Mute (m)') {
+  // let title = muteBtn[0] && muteBtn[0].title?.toLowerCase();
+  console.log('MUTE', muteBtn);
+  if (muteBtn?.length && muteBtn[0] && muteBtn[0].title?.indexOf('Mute') === 0) {
     muteBtn[0].click();
   }
+}
+function muteVideoOnce() {
+  console.log('MUTEONCE');
+  // need to clean unused props
+  document.dispatchEvent(new KeyboardEvent('keydown', {
+    altKey: false,
+    bubbles: true,
+    cancelBubble: false,
+    cancelable: true,
+    charCode: 0,
+    code: "KeyM",
+    composed: true,
+    ctrlKey: false,
+    currentTarget: null,
+    defaultPrevented: false,
+    detail: 0,
+    eventPhase: 0,
+    isComposing: false,
+    key: "m",
+    keyCode: 77,
+    location: 0,
+    metaKey: false,
+    repeat: false,
+    returnValue: true,
+    shiftKey: false
+  }));
 }
 function changeVideoQuality() {
   window.focus()
@@ -61,7 +89,7 @@ function getVideoStart(video) {
 
 
 // loop videos in one tab
-async function continuePlaylist(openTab) {
+async function continuePlaylist(openTab, muteFlag) {
   let tabIndex = (new URLSearchParams(window.location.search)).get('ti');
   let videoIndex = (new URLSearchParams(window.location.search)).get('vi');
   let offset = (new URLSearchParams(window.location.search)).get('offset');
@@ -74,8 +102,9 @@ async function continuePlaylist(openTab) {
   loopLength = isNaN(Number(loopLength)) ? 3 : Number(loopLength);
 
   setTimeout(() => {
-    console.log('nextTab:', tabIndex);
-    muteVideo();
+    console.log('nextTab:', tabIndex, muteFlag);
+    // if (muteFlag) muteVideoOnce();
+    setTimeout(() => muteVideo(), 500);
     likeVideo();
   }, 2000);
 
@@ -95,7 +124,7 @@ async function continuePlaylist(openTab) {
     if (openTab && tabIndex + 1 < tabs.length) {
       window.open(tabs[tabIndex + 1][0].url);
     }
-  }, 2000);
+  }, 4000);
 }
 
 
@@ -162,7 +191,7 @@ function openFirstTab() {
     setTimeout(() => {
       console.log('open:', tabs[0][0].url);
       // window.open(tabs[0][0].url); // for debugging
-      location.replace(tabs[0][0].url);
+      location.replace(tabs[0][0].url + '&mute=1');
     }, 100);
 
   }, 5000);
@@ -180,7 +209,8 @@ if (window.location.href.includes('&openFirstTab=1')) {
 
 
 const openTab = window.location.search.includes('&openTab=1');
+const muteFlag = window.location.search.includes('&mute=1');
 const play = window.location.search.includes('&promote=1');
 if (play) {
-  setTimeout(() => { continuePlaylist(openTab); }, 100);
+  setTimeout(() => { continuePlaylist(openTab, muteFlag); }, 100);
 }
