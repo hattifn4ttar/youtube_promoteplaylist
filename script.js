@@ -21,9 +21,7 @@ function commentVideo() {
   // in progress
 }
 function muteVideo() {
-  // window.focus()
   const muteBtn = document.getElementsByClassName('ytp-mute-button ytp-button');
-  // let title = muteBtn[0] && muteBtn[0].title?.toLowerCase();
   console.log('MUTE', muteBtn);
   if (muteBtn?.length && muteBtn[0] && muteBtn[0].title?.indexOf('Mute') === 0) {
     muteBtn[0].click();
@@ -103,7 +101,7 @@ async function continuePlaylist(openTab, muteFlag) {
 
   setTimeout(() => {
     console.log('nextTab:', tabIndex, muteFlag);
-    // if (muteFlag) muteVideoOnce();
+    if (muteFlag) muteVideoOnce();
     setTimeout(() => muteVideo(), 500);
     likeVideo();
   }, 2000);
