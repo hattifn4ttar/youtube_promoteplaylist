@@ -9,15 +9,9 @@ async function startScript(nTabs) {
       alert('URL is invalid. Open YouTube playlist.');
       return;
     }
-
-    let [origin, search] = url.split('?');
-    let urlObj = (new URLSearchParams('?' + search)); //.get('loopLength');
-    let newUrl = url + '&openFirstTab=1&nTabs=' + nTabs;
-    if (search.includes('&index=')) {
-      urlObj.delete('index');
-      newUrl = origin + '?' + urlObj.toString() + '&openFirstTab=1&nTabs=' + nTabs;
-    }
-    window.open(newUrl);
+    chrome.storage.local.set({ startUrl: url, openTime: (new Date()).getTime(), nTabs });
+    console.log('newUrl:', url);
+    window.open(url);
   });
 }
 

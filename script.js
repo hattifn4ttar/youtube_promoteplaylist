@@ -64,7 +64,7 @@ function getVideoStart(video) {
   // get random length
   const randomMultiplier = (0.5 + Math.random() * 1);
   let watchTimeSec = Math.floor(randomMultiplier * 60 + 100, 0); // random time + ads
-  // watchTimeSec = 10; // for testing
+  // watchTimeSec = 15; // for testing
 
   // get video duration
   let timer1 = video?.children[0]?.children[1]?.children[0]?.children[0]?.children[2]?.children[1]?.children[1];
@@ -87,17 +87,8 @@ function getVideoStart(video) {
 
 
 // loop videos in one tab
-async function continuePlaylist(openTab, muteFlag) {
-  let tabIndex = (new URLSearchParams(window.location.search)).get('ti');
-  let videoIndex = (new URLSearchParams(window.location.search)).get('vi');
-  let offset = (new URLSearchParams(window.location.search)).get('offset');
-  let nTabs = (new URLSearchParams(window.location.search)).get('nTabs');
-  let loopLength = (new URLSearchParams(window.location.search)).get('ll');
-  tabIndex = isNaN(Number(tabIndex)) ? 0 : Number(tabIndex);
-  videoIndex = isNaN(Number(videoIndex)) ? 0 : Number(videoIndex);
-  offset = isNaN(Number(offset)) ? 0 : Number(offset);
-  nTabs = isNaN(Number(nTabs)) ? 3 : Number(nTabs);
-  loopLength = isNaN(Number(loopLength)) ? 3 : Number(loopLength);
+async function continuePlaylist(tab) {
+  const { tabIndex, videoIndex, mute: muteFlag, openTab, loopLength, nTabs, offset } = tab;
 
   setTimeout(() => {
     console.log('nextTab:', tabIndex, muteFlag);
@@ -109,18 +100,35 @@ async function continuePlaylist(openTab, muteFlag) {
   setTimeout(async () => {
     let tabs = await chrome.storage.local.get('tabs');
     tabs = tabs.tabs;
-    console.log('tabs:', tabIndex, tabs);
+    tabs[tabIndex][videoIndex].openTab = false;
+    tabs.forEach(t => { t.forEach(v => { v.mute = false; }) });
+    chrome.storage.local.set({ tabs });
 
     // loop videos in the save tab
     const newVideoIndex = (videoIndex + 1) % loopLength;
     const watchTime = tabs[tabIndex][newVideoIndex]?.watchTime || 40;
     let newUrl = tabs[tabIndex][newVideoIndex].url;
-    newUrl = newUrl.replace('&openTab=1', '');
-    setTimeout(() => { location.replace(newUrl); }, 1000 * watchTime);
+    console.log('NEW TABS:', tabIndex, newVideoIndex, newUrl, watchTime, tabs);
+    
+    setTimeout(async () => {
+      // update timer
+      let tabsTimer = await chrome.storage.local.get('tabsTimer');
+      tabsTimer = tabsTimer.tabsTimer;
+      tabsTimer[tabIndex] = { ...tabs[tabIndex][newVideoIndex], openTime: (new Date()).getTime() };
+      chrome.storage.local.set({ tabsTimer });
+      location.replace(newUrl);
+    }, 1000 * watchTime);
 
     // open new tab
     if (openTab && tabIndex + 1 < tabs.length) {
-      window.open(tabs[tabIndex + 1][0].url);
+      // update timer
+      let newTabIndex = tabIndex + 1;
+      let tabsTimer = await chrome.storage.local.get('tabsTimer');
+      tabsTimer = tabsTimer.tabsTimer;
+      tabsTimer[newTabIndex] = { ...tabs[newTabIndex][0], openTime: (new Date()).getTime() };
+      chrome.storage.local.set({ tabsTimer });
+      
+      setTimeout(() => window.open(tabs[newTabIndex][0].url), 100);
     }
   }, 4000);
 }
@@ -128,20 +136,11 @@ async function continuePlaylist(openTab, muteFlag) {
 
 
 // first tab only
-function openFirstTab() {
-  let nTabs = (new URLSearchParams(window.location.search)).get('nTabs');
-  nTabs = isNaN(Number(nTabs)) ? 3 : Number(nTabs);
+async function openFirstTab() {
+  let nTabs = await chrome.storage.local.get('nTabs');
+  nTabs = nTabs.nTabs;
 
   setTimeout(async () => {
-    // get video url and start time
-    // works for these urls:
-    // #1 https://www.youtube.com/playlist?list=PL55RiY5tL51rrgq6xi67Mc6cwOHXw_nB1 someone else's playlist
-    // #2 https://www.youtube.com/playlist?list=PLQxYKug91T31ixyCs81TwIl8wAiD9AZAH created by me
-    // #3 https://www.youtube.com/watch?v=70RmF0rPj9o&list=PLQxYKug91T31ixyCs81TwIl8wAiD9AZAH when video is open
-    // #4 https://www.youtube.com/watch?v=B7_17cbaBKM&list=UUUGfDbfRIx51kJGGHIFo8Rw playlist from channel
-    // doesn't work for 
-    // #5 https://www.youtube.com/playlist?list=PLbZIPy20-1pN7mqjckepWF78ndb6ci_qi same as #1? second tab doesn't open
-    // #6 https://www.youtube.com/watch?v=hT_nvWreIhg&list=PLbZIPy20-1pN7mqjckepWF78ndb6ci_qi same as #3? even first tab doesn't open
     const videos1 = document.getElementsByClassName('yt-simple-endpoint style-scope ytd-playlist-panel-video-renderer'); 
     const videos2 = document.querySelectorAll("ytd-playlist-video-renderer.style-scope.ytd-playlist-video-list-renderer");
 
@@ -152,7 +151,7 @@ function openFirstTab() {
       chrome.storage.local.set({ videos: [] });
       return;
     }
-
+  
     const urls = [...videos].map((v, i) => {
       const [watchTime, startTime, duration] = getVideoStart(v);
       const randomMultiplier = (0.5 + Math.random() * 1);
@@ -178,8 +177,14 @@ function openFirstTab() {
         return {
           duration: v.duration,
           watchTime: v.watchTime,
-          url: v.url + '&promote=1&offset=' + offset + '&ll=' + loopLength + ('&ti=' + tIndex) + (!vIndex ? '&openTab=1' : '') + '&vi=' + vIndex,
-          };
+          url: v.url,
+          openTab: !vIndex,
+          offset,
+          loopLength,
+          tabIndex: tIndex,
+          videoIndex: vIndex,
+          mute: !tIndex && !vIndex,
+        };
       });
       tabs.push(tabUrls);
     }
@@ -188,27 +193,80 @@ function openFirstTab() {
 
     setTimeout(() => {
       console.log('open:', tabs[0][0].url);
+      // update timer
+      let tabsTimer = tabs.map(d => ({}));
+      tabsTimer[0] = { ...tabs[0][0], openTime: (new Date()).getTime() };
+      chrome.storage.local.set({ tabsTimer });
       // window.open(tabs[0][0].url); // for debugging
-      location.replace(tabs[0][0].url + '&mute=1');
+      location.replace(tabs[0][0].url);
     }, 100);
 
   }, 5000);
 }
 
-// &openFirstTab=1 is lost in url for https://www.youtube.com/watch?v=hT_nvWreIhg&list=PLbZIPy20-1pN7mqjckepWF78ndb6ci_qi&t=125s
-// &openTab=1 is lost in url for https://www.youtube.com/playlist?list=PLbZIPy20-1pN7mqjckepWF78ndb6ci_qi
 const loc = window.location.href;
-setTimeout(() => console.log('href:', loc), 3000);
+async function getFirstTabFlag() {
+  // sometimes parameters are lost in url - use storage instead of url
+  // url doesn't work for this playlist for example - https://www.youtube.com/watch?v=hT_nvWreIhg&list=PLbZIPy20-1pN7mqjckepWF78ndb6ci_qi
+  let openFirstTabFlag = false;
+  let startUrl = await chrome.storage.local.get('startUrl');
+  let openTime = await chrome.storage.local.get('openTime');
 
-if (window.location.href.includes('&openFirstTab=1')) {
-  openFirstTab();
+  if (!startUrl.startUrl || !openTime.openTime) return;
+  let [origin, search] = startUrl.startUrl.split('?');
+  let playlist = (new URLSearchParams('?' + search)).get('list');
+
+  openFirstTabFlag = loc.includes(playlist) && ((new Date()).getTime() - openTime.openTime) / 1000 < 2;
+
+  if (openFirstTabFlag) {
+    openFirstTab();
+  }
 }
-// end first tab
+getFirstTabFlag();
 
 
-const openTab = window.location.search.includes('&openTab=1');
-const muteFlag = window.location.search.includes('&mute=1');
-const play = window.location.search.includes('&promote=1');
-if (play) {
-  setTimeout(() => { continuePlaylist(openTab, muteFlag); }, 100);
+async function getContinueFlag() {
+  let video = (new URLSearchParams(window.location.search)).get('v');
+  let playlist = (new URLSearchParams(window.location.search)).get('list');
+
+  let tabsTimer = await chrome.storage.local.get('tabsTimer');
+  tabsTimer = tabsTimer.tabsTimer;
+  if (!tabsTimer?.length) return;
+
+  const tab = tabsTimer.find(t => t.url?.includes(video) && t.url?.includes(playlist));
+  if (!tab?.openTime) return;
+  let timeStamp = tab.openTime;
+  let tabUrl = tab.url;
+
+  // console.log('href:', loc, video, playlist, tab);
+  // console.log('tab:', tabUrl, tabUrl.includes(video), tabUrl.includes(playlist));
+  // why it takes 5 seconds? more for bigger playlists, optimal is <30 videos in playlist
+  let timeOffset = 5;
+  if (tabUrl.includes(video) && tabUrl.includes(playlist) && ((new Date()).getTime() - timeStamp) / 1000 < timeOffset) {
+    setTimeout(() => { continuePlaylist(tab); }, 100);
+  }
 }
+getContinueFlag();
+
+/*
+// for debugging
+setTimeout(async () => {
+  let video = (new URLSearchParams(window.location.search)).get('v');
+  let playlist = (new URLSearchParams(window.location.search)).get('list');
+
+  let tabsTimer = await chrome.storage.local.get('tabsTimer');
+  tabsTimer = tabsTimer.tabsTimer;
+  if (!tabsTimer?.length) return;
+
+  const tab = tabsTimer.find(t => t.url?.includes(video) && t.url?.includes(playlist));
+  if (!tab?.openTime) return;
+  let timeStamp = tab.openTime;
+  let tabUrl = tab.url;
+
+  console.log('timer:', video, playlist, tabsTimer);
+  console.log('timer_href:', ((new Date()).getTime() - timeStamp) / 1000, tabUrl.includes(video), tabUrl.includes(playlist), tab);
+  if (tabUrl.includes(video) && tabUrl.includes(playlist) && ((new Date()).getTime() - timeStamp) / 1000 < 2) {
+    // setTimeout(() => { continuePlaylist(tab); }, 100);
+  }
+}, 2000);
+*/
