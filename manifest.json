@@ -1,7 +1,7 @@
 {
   "name": "Promote YouTube videos",
   "description": "Promote videos in a selected playlist on YouTube. Together we can fight bots",
-  "version": "1.03",
+  "version": "1.04",
   "manifest_version": 3,
   "icons": {
     "128": "/images/youtube128.png"
