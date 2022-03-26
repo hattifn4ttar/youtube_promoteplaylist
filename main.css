@@ -29,18 +29,29 @@ html {
   cursor: pointer;
 }
 
-.title {
+.openchannels-popup .title {
   width: 100%;
   font-size: 18px;
   font-weight: 500;
 }
-a {
+.openchannels-popup a {
   color: rgba(255,255,255,0.8);
 }
-a:hover {
+.openchannels-popup a:hover {
   color: rgba(255,255,255,1);
 }
-.logo {
+.openchannels-popup .logo {
   display: none;
   max-width: 70px;
+}
+
+.openchannels-popup p {
+  line-height: 20px;
+  font-size: 14px;
+}
+
+.openchannels-popup .links-bottom {
+  float: right;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }

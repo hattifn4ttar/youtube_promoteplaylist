@@ -22,8 +22,7 @@ document.getElementById('clickactivity5').addEventListener('click', () => startS
 document.getElementById('clickactivity3').addEventListener('click', () => startScript(3));
 document.getElementById('clickactivity2').addEventListener('click', () => startScript(2));
 
-// document.getElementById('githubLink').addEventListener('click', () => window.open('https://github.com/hattifn4ttar/youtube_openchannels'));
-document.getElementById('youtubeLink').addEventListener('click', () => window.open('https://www.youtube.com/watch?v=jowEf5tSSyc'));
+document.getElementById('githubLinkPlaylist').addEventListener('click', () => window.open('https://github.com/hattifn4ttar/youtube_promoteplaylist'));
 document.getElementById('webLink').addEventListener('click', () => window.open('https://hattifn4ttar.github.io/supportfreemedia/'));
 
 chrome.storage.local.set({ like: true });
