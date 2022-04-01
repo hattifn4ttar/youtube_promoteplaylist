@@ -1,8 +1,9 @@
-### Chrome Extension - boost YouTube videos
+### Chrome Extension - promote YouTube videos
+About the project: *[https://hattifn4ttar.github.io/supportfreemedia](https://hattifn4ttar.github.io/supportfreemedia)*
 
-The extension will open playlist in multiple tabs and loop through videos with optimal interval.
+The extension helps to promote videos in a selected YouTube playlist. If used collectively, we can fight internet bots and support content that is valuable for the community.
 
-If used collectively, we can fight internet bots and promote videos that are valuable for the community.
+The extension will open a playlist in multiple tabs, in each tab it will play videos with optimal interval and like them.
 
 Built in collaboration with *[@detoxbrainwash](https://www.youtube.com/c/DetoxBrainwash)*.
 See *@detoxbrainwash* video *[https://www.youtube.com/watch?v=jowEf5tSSyc](https://www.youtube.com/watch?v=jowEf5tSSyc)* (en) and *[https://www.youtube.com/watch?v=eTSipyTLSjo](https://www.youtube.com/watch?v=eTSipyTLSjo)* (ru).
