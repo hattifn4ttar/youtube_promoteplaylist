@@ -86,8 +86,8 @@ function getVideoStart(video) {
 
 
 
-// loop videos in one tab
 async function continuePlaylist(tab) {
+  // continue playing videos in a tab
   const { tabIndex, videoIndex, mute: muteFlag, openTab, loopLength, nTabs, offset } = tab;
 
   setTimeout(() => {
@@ -104,7 +104,7 @@ async function continuePlaylist(tab) {
     tabs.forEach(t => { t.forEach(v => { v.mute = false; }) });
     chrome.storage.local.set({ tabs });
 
-    // loop videos in the save tab
+    // loop videos in the same tab
     const newVideoIndex = (videoIndex + 1) % loopLength;
     const watchTime = tabs[tabIndex][newVideoIndex]?.watchTime || 40;
     let newUrl = tabs[tabIndex][newVideoIndex].url;
@@ -119,7 +119,7 @@ async function continuePlaylist(tab) {
       location.replace(newUrl);
     }, 1000 * watchTime);
 
-    // open new tab
+    // open new tab if not all of them were opened yet
     if (openTab && tabIndex + 1 < tabs.length) {
       // update timer
       let newTabIndex = tabIndex + 1;
@@ -135,8 +135,8 @@ async function continuePlaylist(tab) {
 
 
 
-// first tab only
 async function openFirstTab() {
+  // open first tab
   let nTabs = await chrome.storage.local.get('nTabs');
   nTabs = nTabs.nTabs;
 
@@ -145,7 +145,6 @@ async function openFirstTab() {
     const videos2 = document.querySelectorAll("ytd-playlist-video-renderer.style-scope.ytd-playlist-video-list-renderer");
 
     let videos = videos1.length ? [...videos1] : [...videos2];
-    // videos = videos.slice(0, 12);
     if (!videos.length) {
       chrome.storage.local.set({ playlistType: null });
       chrome.storage.local.set({ videos: [] });
@@ -204,10 +203,13 @@ async function openFirstTab() {
   }, 5000);
 }
 
+
+// sometimes parameters are lost in url - using storage instead of url to pass all parameters
+// saving time before tab is opened and url of the new tab to storate, then grabbing parameters from storage based on url and if time interval < 2-5 sec
 const loc = window.location.href;
-async function getFirstTabFlag() {
-  // sometimes parameters are lost in url - use storage instead of url
-  // url doesn't work for this playlist for example - https://www.youtube.com/watch?v=hT_nvWreIhg&list=PLbZIPy20-1pN7mqjckepWF78ndb6ci_qi
+async function checkFirstTabFlag() {
+  // first tab logic
+  // in the first tab it grabs videos from the playlist and generates a list of videos for each tab
   let openFirstTabFlag = false;
   let startUrl = await chrome.storage.local.get('startUrl');
   let openTime = await chrome.storage.local.get('openTime');
@@ -222,10 +224,12 @@ async function getFirstTabFlag() {
     openFirstTab();
   }
 }
-getFirstTabFlag();
+checkFirstTabFlag();
 
 
-async function getContinueFlag() {
+async function checkContinueFlag() {
+  // on url updated
+  // continue playing videos in the list, and open a new tab if not all of them were opened yet
   let video = (new URLSearchParams(window.location.search)).get('v');
   let playlist = (new URLSearchParams(window.location.search)).get('list');
 
@@ -238,35 +242,9 @@ async function getContinueFlag() {
   let timeStamp = tab.openTime;
   let tabUrl = tab.url;
 
-  // console.log('href:', loc, video, playlist, tab);
-  // console.log('tab:', tabUrl, tabUrl.includes(video), tabUrl.includes(playlist));
-  // why it takes 5 seconds? more for bigger playlists, optimal is <30 videos in playlist
   let timeOffset = 5;
   if (tabUrl.includes(video) && tabUrl.includes(playlist) && ((new Date()).getTime() - timeStamp) / 1000 < timeOffset) {
     setTimeout(() => { continuePlaylist(tab); }, 100);
   }
 }
-getContinueFlag();
-
-/*
-// for debugging
-setTimeout(async () => {
-  let video = (new URLSearchParams(window.location.search)).get('v');
-  let playlist = (new URLSearchParams(window.location.search)).get('list');
-
-  let tabsTimer = await chrome.storage.local.get('tabsTimer');
-  tabsTimer = tabsTimer.tabsTimer;
-  if (!tabsTimer?.length) return;
-
-  const tab = tabsTimer.find(t => t.url?.includes(video) && t.url?.includes(playlist));
-  if (!tab?.openTime) return;
-  let timeStamp = tab.openTime;
-  let tabUrl = tab.url;
-
-  console.log('timer:', video, playlist, tabsTimer);
-  console.log('timer_href:', ((new Date()).getTime() - timeStamp) / 1000, tabUrl.includes(video), tabUrl.includes(playlist), tab);
-  if (tabUrl.includes(video) && tabUrl.includes(playlist) && ((new Date()).getTime() - timeStamp) / 1000 < 2) {
-    // setTimeout(() => { continuePlaylist(tab); }, 100);
-  }
-}, 2000);
-*/
+checkContinueFlag();
