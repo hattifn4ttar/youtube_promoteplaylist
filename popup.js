@@ -9,6 +9,11 @@ async function startScript(nTabs) {
       alert('URL is invalid. Open YouTube playlist.');
       return;
     }
+
+    // if (typeof browser === "undefined") {
+    //   var browser = chrome;
+    // }
+
     chrome.storage.local.set({ startUrl: url, openTime: (new Date()).getTime(), nTabs });
     console.log('newUrl:', url);
     window.open(url);

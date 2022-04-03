@@ -29,29 +29,7 @@ function muteVideo() {
 }
 function muteVideoOnce() {
   console.log('MUTEONCE');
-  // need to clean unused props
-  document.dispatchEvent(new KeyboardEvent('keydown', {
-    altKey: false,
-    bubbles: true,
-    cancelBubble: false,
-    cancelable: true,
-    charCode: 0,
-    code: "KeyM",
-    composed: true,
-    ctrlKey: false,
-    currentTarget: null,
-    defaultPrevented: false,
-    detail: 0,
-    eventPhase: 0,
-    isComposing: false,
-    key: "m",
-    keyCode: 77,
-    location: 0,
-    metaKey: false,
-    repeat: false,
-    returnValue: true,
-    shiftKey: false
-  }));
+  document.dispatchEvent(new KeyboardEvent('keydown', { keyCode: 77 }));
 }
 function changeVideoQuality() {
   window.focus()
@@ -60,11 +38,12 @@ function changeVideoQuality() {
     btn[0].cilck();
   }
 }
-function getVideoStart(video) {
+
+function getVideoStarC(video, isLastVideo) {
   // get random length
   const randomMultiplier = (0.5 + Math.random() * 1);
-  let watchTimeSec = Math.floor(randomMultiplier * 60 + 100, 0); // random time + ads
-  watchTimeSec = 15; // for testing
+  let watchTimeSec = Math.floor(randomMultiplier * 60 + 40, 0); // random time + ads
+  // watchTimeSec = 15; // for testing
 
   // get video duration
   let timer1 = video?.children[0]?.children[1]?.children[0]?.children[0]?.children[2]?.children[1]?.children[1];
@@ -79,7 +58,8 @@ function getVideoStart(video) {
 
   // get start time
   watchTimeSec = Math.min(watchTimeSec, seconds);
-  const startSeconds = seconds - watchTimeSec;
+  let startSeconds = seconds - watchTimeSec;
+  if (isLastVideo) startSeconds -= 5;
   return [watchTimeSec, startSeconds, seconds];
 }
 // -- end helpers -------------------------
@@ -87,7 +67,10 @@ function getVideoStart(video) {
 
 
 async function continuePlaylist(tab) {
-  // continue playing videos in a tab
+  // ply next video in a tab
+  // video is open through url instead of click, to be able to set start time
+  // also there is a concern about event.isTrusted, shoul we avoid using e.click()?
+
   const { tabIndex, videoIndex, mute: muteFlag, openTab, loopLength, nTabs, offset } = tab;
 
   setTimeout(() => {
@@ -136,11 +119,12 @@ async function continuePlaylist(tab) {
 
 
 async function openFirstTab() {
-  // open first tab
+  // open playlist and wait to load videos, then generate videos list for all tabs
   let nTabs = await chrome.storage.local.get('nTabs');
   nTabs = nTabs.nTabs;
 
   setTimeout(async () => {
+    // grab elements from the playlist
     const videos1 = document.getElementsByClassName('yt-simple-endpoint style-scope ytd-playlist-panel-video-renderer'); 
     const videos2 = document.querySelectorAll("ytd-playlist-video-renderer.style-scope.ytd-playlist-video-list-renderer");
 
@@ -150,9 +134,19 @@ async function openFirstTab() {
       chrome.storage.local.set({ videos: [] });
       return;
     }
+
+    if (!videos?.length) {
+      alert('Cannot find videos. Open YouTube playlist.');
+      return;
+    }
+
+    let maxN = Math.min(videos.length, 300);
+    loopLength = Math.floor(maxN / nTabs, 0) || 1;
   
-    const urls = [...videos].map((v, i) => {
-      const [watchTime, startTime, duration] = getVideoStart(v);
+    const urls = [...videos].map((v, ii) => {
+      const isLastVideo = ii === videos.length - 1 || loopLength === 1;
+      const [watchTime, startTime, duration] = getVideoStarC(v, isLastVideo);
+      // get video start from storage, othersize calculate random time
       const randomMultiplier = (0.5 + Math.random() * 1);
       const validWatchTime = (isNaN(watchTime) || !watchTime) ? Math.floor(randomMultiplier * 60 + 100, 0) : watchTime;
       const validStartTime = isNaN(startTime) ? 0 : startTime;
@@ -160,14 +154,7 @@ async function openFirstTab() {
       return { url: url + '&t=' + validStartTime + 's', watchTime: validWatchTime, duration };
     });
 
-    if (!urls.length) {
-      alert('Cannot find videos. Open YouTube playlist.');
-      return;
-    }
-
-    let maxN = Math.min(urls.length, 300);
-    loopLength = Math.floor(maxN / nTabs, 0) || 1;
-
+    // generate list of videos for each tab and save to storage
     let tabs = [];
     for (let tIndex = 0; tIndex < nTabs; tIndex += 1) {
       let offset = tIndex * loopLength;
@@ -190,6 +177,7 @@ async function openFirstTab() {
     chrome.storage.local.set({ tabs });
     console.log('tabsFirstLoad:', tabs);
 
+    // open first tab
     setTimeout(() => {
       console.log('open:', tabs[0][0].url);
       // update timer
